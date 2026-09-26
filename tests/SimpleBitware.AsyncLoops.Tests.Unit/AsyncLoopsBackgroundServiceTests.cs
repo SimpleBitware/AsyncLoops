@@ -50,16 +50,16 @@ public class AsyncLoopsBackgroundServiceTests
 
         var cancellationTokenSource = new CancellationTokenSource();
 
-        var sut = new AsyncLoopsBackgroundService(
+        var backgroundService = new AsyncLoopsBackgroundService(
             hostApplicationLifetimeMock.Object,
             [simpleLoopMock.Object],
             loggerMock.Object);
 
         // Act
-        await sut.StartAsync(cancellationTokenSource.Token);
-        await Task.Delay(10);
-        cancellationTokenSource.Cancel();
-        await sut.ExecuteTask;
+        await backgroundService.StartAsync(cancellationTokenSource.Token);
+        await Task.Delay(10, cancellationTokenSource.Token);
+        await cancellationTokenSource.CancelAsync();
+        await backgroundService.ExecuteTask;
 
         // Assert
         simpleLoopMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -75,14 +75,14 @@ public class AsyncLoopsBackgroundServiceTests
         simpleLoopMock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.FromException(new Exception()));
 
-        var sut = new AsyncLoopsBackgroundService(
+        var backgroundService = new AsyncLoopsBackgroundService(
             hostApplicationLifetimeMock.Object,
             [simpleLoopMock.Object],
             loggerMock.Object);
 
         // Act
-        await sut.StartAsync(CancellationToken.None);
-        await sut.ExecuteTask;
+        await backgroundService.StartAsync(CancellationToken.None);
+        await backgroundService.ExecuteTask;
 
         // Assert
         simpleLoopMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -108,14 +108,14 @@ public class AsyncLoopsBackgroundServiceTests
         simpleLoop2Mock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.FromException(new Exception()));
 
-        var sut = new AsyncLoopsBackgroundService(
+        var backgroundService = new AsyncLoopsBackgroundService(
             hostApplicationLifetimeMock.Object,
             [simpleLoop1Mock.Object, simpleLoop2Mock.Object],
             loggerMock.Object);
 
         // Act
-        await sut.StartAsync(CancellationToken.None);
-        await sut.ExecuteTask;
+        await backgroundService.StartAsync(CancellationToken.None);
+        await backgroundService.ExecuteTask;
 
         // Assert
         simpleLoop1Mock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -130,14 +130,14 @@ public class AsyncLoopsBackgroundServiceTests
         var hostApplicationLifetimeMock = new Mock<IHostApplicationLifetime>();
         var simpleLoopMock = new Mock<IAsyncLoop>();
 
-        var sut = new AsyncLoopsBackgroundService(
+        var backgroundService = new AsyncLoopsBackgroundService(
             hostApplicationLifetimeMock.Object,
             [simpleLoopMock.Object],
             loggerMock.Object);
 
         // Act
-        await sut.StartAsync(CancellationToken.None);
-        await sut.ExecuteTask;
+        await backgroundService.StartAsync(CancellationToken.None);
+        await backgroundService.ExecuteTask;
         // Assert
         simpleLoopMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
         hostApplicationLifetimeMock.Verify(x => x.StopApplication(), Times.Once);

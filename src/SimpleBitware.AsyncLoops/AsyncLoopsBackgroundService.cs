@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,16 +14,16 @@ namespace SimpleBitware.AsyncLoops;
 public class AsyncLoopsBackgroundService : BackgroundService
 {
     private readonly IHostApplicationLifetime hostApplicationLifetime;
-    private readonly IEnumerable<IAsyncLoop> simpleLoops;
+    private readonly IEnumerable<IAsyncLoop> asyncLoops;
     private readonly ILogger<AsyncLoopsBackgroundService> logger;
 
     public AsyncLoopsBackgroundService(
         IHostApplicationLifetime hostApplicationLifetime,
-        IEnumerable<IAsyncLoop> simpleLoops,
+        IEnumerable<IAsyncLoop> asyncLoops,
         ILogger<AsyncLoopsBackgroundService> logger)
     {
         this.hostApplicationLifetime = hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
-        this.simpleLoops = simpleLoops ?? throw new ArgumentNullException(nameof(simpleLoops));
+        this.asyncLoops = asyncLoops ?? throw new ArgumentNullException(nameof(asyncLoops));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -42,18 +41,20 @@ public class AsyncLoopsBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        if (!simpleLoops.Any())
+        if (!asyncLoops.Any())
         {
             logger.LogWarning("No loops found.");
             return;
         }
 
-        LogLoopTypesToBeExecuted(simpleLoops);
+        LogLoopTypesToBeExecuted(asyncLoops);
         await Task.Yield();
 
         try
         {
-            var simpleLoopsTasks = simpleLoops.Select(loop => loop.RunAsync(cancellationToken)).ToArray();
+            var simpleLoopsTasks = asyncLoops
+                .Select(loop => loop.RunAsync(cancellationToken))
+                .ToArray();
             await WaitForLoopsAsync(simpleLoopsTasks, cancellationToken);
         }
         catch (Exception ex)
@@ -77,9 +78,9 @@ public class AsyncLoopsBackgroundService : BackgroundService
         hostApplicationLifetime.StopApplication();
     }
 
-    private void LogLoopTypesToBeExecuted(IEnumerable<IAsyncLoop> simpleLoops)
+    private void LogLoopTypesToBeExecuted(IEnumerable<IAsyncLoop> loops)
     {
-        var loopTypes = string.Join(", ", simpleLoops.Select(x => x.GetType()));
+        var loopTypes = string.Join(", ", loops.Select(x => x.GetType()));
         logger.LogInformation("Loops to be executed: {LoopTypes}", loopTypes);
     }
 }

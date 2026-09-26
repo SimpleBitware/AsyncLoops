@@ -1,18 +1,17 @@
 # SimpleLoops
-Simple library for running async loops
+Library for running async loops
 
 ## How to use it
-SimpleLoopsBackgroundService detects all ISimpleLoop service registrations (such as `services.AddSingleton<ISimpleLoop, SimpleLoop<<T>()`) and run them. <br/>
+`AsyncLoopsBackgroundService` detects all `IAsyncLoop` service registrations (such as `services.AddSingleton<IAsyncLoop, AsyncLoop()`) and run them. <br/>
 At minimum, the following services needs to be registered:<br/>
 ```
-services.AddHostedService<SimpleLoopsBackgroundService>();                       /* background service which runs the loops */
-services.AddSingleton<ISimpleLoop, SimpleLoop<ISimpleLoopIterationExecutor>>();  /* the loop */
-services.AddSingleton<ISimpleLoopIterationExecutor, LoopItemExecutor>();         /* loop iteration executor which contains the logic executed at every iteration */
-services.AddSingleton<SimpleLoopConfiguration<ISimpleLoopIterationExecutor>>();  /* optional, loop configuration otherwise the default configuration will be used */
+services.AddHostedService<AsyncLoopsBackgroundService>();     /* background service which runs the loops */
+services.AddSingleton<IAsyncLoop, AsyncLoop>();               /* custom async loop, expending `AsyncLoopBase` or implementing `IAsyncLoop` */
+services.AddSingleton<AsyncLoopConfiguration>();              /* only if applied to all async loops */
 
 /* dependencies */
 services.AddSingleton<ITask, TaskDelayWrapper>();
 services.AddSingleton<IDateTime, DateTimeWrapper>();
 ```
 
-[Code sample](https://github.com/SimpleBitware/Sb.SimpleLoops/blob/main/tests/Sb.SimpleLoops.Tests.End2End/SimpleLoopsBackgroundServiceTests.cs)
+[Code sample](https://github.com/SimpleBitware/AsyncLoops/blob/main/tests/SimpleBitware.AsyncLoops.Tests.Unit/TestAsyncLoop.cs)

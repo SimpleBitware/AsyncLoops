@@ -1,20 +1,18 @@
 ﻿namespace SimpleBitware.AsyncLoops;
 
 /// <summary>
-/// Simple loop configuration.
+/// Async loop configuration.
 /// </summary>
-/// <typeparam name="T">The time of simple loop.</typeparam>
-public record AsyncLoopConfiguration<T>
+public record AsyncLoopConfiguration
 {
     /// <summary>
     /// Wait time between iterations in milliseconds.
-    /// Default is 15 seconds.
     /// </summary>
-    public int WaitingTimeInMs { get; set; } = 15000;
+    public required int WaitingTimeInMs { get; init; }
 
     /// <summary>
     /// If true, loop exits and exceptions will be propagated to the caller.
-    /// Default is false. All exceptions will be logged and loop will continue execution.
+    /// Default is false. All exceptions will be logged, and the loop will continue execution.
     /// </summary>
-    public bool PropagateExceptions { get; set; }
+    public required bool PropagateExceptions { get; init; }
 }

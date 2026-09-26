@@ -6,15 +6,15 @@ namespace SimpleBitware.AsyncLoops.Tests.Unit;
 
 public class AsyncLoopTests
 {
-    private Mock<ILogger<AsyncLoop<IAsyncLoopIterationExecutor>>> loggerMock;
-    private Mock<AsyncLoopConfiguration<IAsyncLoopIterationExecutor>> configurationMock;
+    private Mock<ILogger<TestAsyncLoop>> loggerMock;
+    private Mock<AsyncLoopConfiguration> configurationMock;
     private Mock<IDateTime> dateTimeMock;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        loggerMock = new Mock<ILogger<AsyncLoop<IAsyncLoopIterationExecutor>>>();
-        configurationMock = new Mock<AsyncLoopConfiguration<IAsyncLoopIterationExecutor>>();
+        loggerMock = new Mock<ILogger<TestAsyncLoop>>();
+        configurationMock = new Mock<AsyncLoopConfiguration>();
         dateTimeMock = new Mock<IDateTime>();
     }
 
@@ -24,22 +24,23 @@ public class AsyncLoopTests
         // Arrange
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
-        cancellationTokenSource.Cancel();
+        await cancellationTokenSource.CancelAsync();
 
+        var funcMock = new Mock<Func<CancellationToken, Task<IterationResult>>>();
         var taskMock = new Mock<ITask>();
-        var iterationExecutorMock = new Mock<IAsyncLoopIterationExecutor>();
-        var sut = new AsyncLoop<IAsyncLoopIterationExecutor>(
-            loggerMock.Object, 
-            configurationMock.Object, 
-            iterationExecutorMock.Object, 
+        var sut = new TestAsyncLoop(
+            configurationMock.Object,
             taskMock.Object,
-            dateTimeMock.Object);
+            dateTimeMock.Object,
+            loggerMock.Object,
+            funcMock.Object);
 
         // Act
         await sut.RunAsync(cancellationToken);
 
         // Assert
-        iterationExecutorMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Never);
+        funcMock.Verify(f => f(It.IsAny<CancellationToken>()), Times.Never);
+        taskMock.Verify(x => x.Delay(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -49,24 +50,24 @@ public class AsyncLoopTests
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
-        var taskMock = new Mock<ITask>();
-        var iterationExecutorMock = new Mock<IAsyncLoopIterationExecutor>();
-        iterationExecutorMock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(IterationResult.Continue)
-                            .Callback(()=> cancellationTokenSource.Cancel());
+        var funcMock = new Mock<Func<CancellationToken, Task<IterationResult>>>();
+        funcMock.Setup(x => x(It.IsAny<CancellationToken>()))
+            .Callback<CancellationToken>(ct => cancellationTokenSource.Cancel())
+            .ReturnsAsync(IterationResult.Continue);
 
-        var sut = new AsyncLoop<IAsyncLoopIterationExecutor>(
-            loggerMock.Object,
+        var taskMock = new Mock<ITask>();
+        var sut = new TestAsyncLoop(
             configurationMock.Object,
-            iterationExecutorMock.Object,
             taskMock.Object,
-            dateTimeMock.Object);
+            dateTimeMock.Object,
+            loggerMock.Object,
+            funcMock.Object);
 
         // Act
         await sut.RunAsync(cancellationToken);
 
         // Assert
-        iterationExecutorMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
+        funcMock.Verify(f => f(It.IsAny<CancellationToken>()), Times.Once);
         taskMock.Verify(x => x.Delay(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -77,24 +78,24 @@ public class AsyncLoopTests
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
-        var taskMock = new Mock<ITask>();
-        var iterationExecutorMock = new Mock<IAsyncLoopIterationExecutor>();
-        iterationExecutorMock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(IterationResult.Wait)
-                            .Callback(() => cancellationTokenSource.Cancel());
+        var funcMock = new Mock<Func<CancellationToken, Task<IterationResult>>>();
+        funcMock.Setup(x => x(It.IsAny<CancellationToken>()))
+            .Callback<CancellationToken>(ct => cancellationTokenSource.Cancel())
+            .ReturnsAsync(IterationResult.Wait);
 
-        var sut = new AsyncLoop<IAsyncLoopIterationExecutor>(
-            loggerMock.Object,
+        var taskMock = new Mock<ITask>();
+        var sut = new TestAsyncLoop(
             configurationMock.Object,
-            iterationExecutorMock.Object,
             taskMock.Object,
-            dateTimeMock.Object);
+            dateTimeMock.Object,
+            loggerMock.Object,
+            funcMock.Object);
 
         // Act
         await sut.RunAsync(cancellationToken);
 
         // Assert
-        iterationExecutorMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
+        funcMock.Verify(f => f(It.IsAny<CancellationToken>()), Times.Once);
         taskMock.Verify(x => x.Delay(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -105,23 +106,24 @@ public class AsyncLoopTests
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
-        var taskMock = new Mock<ITask>();
-        var iterationExecutorMock = new Mock<IAsyncLoopIterationExecutor>();
-        iterationExecutorMock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(IterationResult.Stop);
+        var funcMock = new Mock<Func<CancellationToken, Task<IterationResult>>>();
+        funcMock.Setup(x => x(It.IsAny<CancellationToken>()))
+            .Callback<CancellationToken>(ct => cancellationTokenSource.Cancel())
+            .ReturnsAsync(IterationResult.Stop);
 
-        var sut = new AsyncLoop<IAsyncLoopIterationExecutor>(
-            loggerMock.Object,
+        var taskMock = new Mock<ITask>();
+        var sut = new TestAsyncLoop(
             configurationMock.Object,
-            iterationExecutorMock.Object,
             taskMock.Object,
-            dateTimeMock.Object);
+            dateTimeMock.Object,
+            loggerMock.Object,
+            funcMock.Object);
 
         // Act
         await sut.RunAsync(cancellationToken);
 
         // Assert
-        iterationExecutorMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
+        funcMock.Verify(f => f(It.IsAny<CancellationToken>()), Times.Once);
         taskMock.Verify(x => x.Delay(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -132,24 +134,26 @@ public class AsyncLoopTests
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
-        var taskMock = new Mock<ITask>();
-        var iterationExecutorMock = new Mock<IAsyncLoopIterationExecutor>();
-        iterationExecutorMock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
-                            .Returns(Task.FromException<IterationResult>(new Exception()));
+        var funcMock = new Mock<Func<CancellationToken, Task<IterationResult>>>();
+        funcMock.Setup(x => x(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotSupportedException());
 
-        var configuration = new AsyncLoopConfiguration<IAsyncLoopIterationExecutor>
+        var configuration = new AsyncLoopConfiguration()
         {
+            WaitingTimeInMs = 1,
             PropagateExceptions = true
         };
-        var sut = new AsyncLoop<IAsyncLoopIterationExecutor>(
-            loggerMock.Object,
+        
+        var taskMock = new Mock<ITask>();
+        var sut = new TestAsyncLoop(
             configuration,
-            iterationExecutorMock.Object,
             taskMock.Object,
-            dateTimeMock.Object);
+            dateTimeMock.Object,
+            loggerMock.Object,
+            funcMock.Object);
 
         // Act
-        Assert.ThrowsAsync<Exception>(() => sut.RunAsync(cancellationToken));
+        Assert.ThrowsAsync<NotSupportedException>(() => sut.RunAsync(cancellationToken));
     }
 
     [Test]
@@ -159,28 +163,30 @@ public class AsyncLoopTests
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
-        var taskMock = new Mock<ITask>();
-        var iterationExecutorMock = new Mock<IAsyncLoopIterationExecutor>();
-        iterationExecutorMock.Setup(x => x.RunAsync(It.IsAny<CancellationToken>()))
-                            .Returns(Task.FromException<IterationResult>(new Exception()))
-                            .Callback(() => cancellationTokenSource.Cancel());
+        var funcMock = new Mock<Func<CancellationToken, Task<IterationResult>>>();
+        funcMock.Setup(x => x(It.IsAny<CancellationToken>()))
+            .Callback<CancellationToken>(ct => cancellationTokenSource.Cancel())
+            .ThrowsAsync(new NotSupportedException());
 
-        var configuration = new AsyncLoopConfiguration<IAsyncLoopIterationExecutor>
+        var configuration = new AsyncLoopConfiguration()
         {
+            WaitingTimeInMs = 1,
             PropagateExceptions = false
         };
-        var sut = new AsyncLoop<IAsyncLoopIterationExecutor>(
-            loggerMock.Object,
+        
+        var taskMock = new Mock<ITask>();
+        var sut = new TestAsyncLoop(
             configuration,
-            iterationExecutorMock.Object,
             taskMock.Object,
-            dateTimeMock.Object);
+            dateTimeMock.Object,
+            loggerMock.Object,
+            funcMock.Object);
 
         // Act
         await sut.RunAsync(cancellationToken);
 
         // Assert
-        iterationExecutorMock.Verify(x => x.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
+        funcMock.Verify(f => f(It.IsAny<CancellationToken>()), Times.Once);
         taskMock.Verify(x => x.Delay(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

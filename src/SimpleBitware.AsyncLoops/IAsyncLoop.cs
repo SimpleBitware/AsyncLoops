@@ -4,9 +4,9 @@ using System.Threading;
 namespace SimpleBitware.AsyncLoops;
 
 /// <summary>
-/// Simple loop interface.
+/// Async loop interface.
 /// </summary>
 public interface IAsyncLoop
 {
-    Task RunAsync(CancellationToken stoppingToken);
+    Task RunAsync(CancellationToken cancellationToken);
 }

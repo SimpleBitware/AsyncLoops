@@ -1,17 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
-    <Title>Async Loops</Title>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>SimpleBitware.AsyncLoops</PackageId>
+    <Description>Simple library for running async loops in parallel</Description>
     <Authors>Lucian Bornaz</Authors>
     <Company>Simple Bitware</Company>
-    <Description>Simple library for running async loops in parallel</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <PackageId>SimpleBitware.AsyncLoops</PackageId>
-    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/SimpleBitware/AsyncLoops</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/SimpleBitware/AsyncLoops/tree/main/src/SimpleBitware.AsyncLoops</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>logo.png</PackageIcon>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
 
@@ -24,13 +30,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="README.md" />
+    <None Include="..\..\README.md"
+          Pack="true"
+          PackagePath=""
+          Visible="false"/>
+    <None Include="..\..\resources\logo.png"
+          Pack="true"
+          PackagePath=""
+          Visible="false"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="PolySharp" Version="1.16.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="SimpleBitware.Common.Abstractions" Version="1.0.2" />
     <PackageReference Include="System.Text.Json" Version="9.0.2" />
     <PackageReference Include="MinVer" Version="6.0.0">

@@ -3,7 +3,6 @@
     <Project Path="src\SimpleBitware.AsyncLoops\SimpleBitware.AsyncLoops.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests\SimpleBitware.AsyncLoops.Tests.End2End\SimpleBitware.AsyncLoops.Tests.End2End.csproj" />
     <Project Path="tests\SimpleBitware.AsyncLoops.Tests.Unit\SimpleBitware.AsyncLoops.Tests.Unit.csproj" />
   </Folder>
 </Solution>
