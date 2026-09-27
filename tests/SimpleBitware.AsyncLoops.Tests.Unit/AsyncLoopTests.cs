@@ -143,7 +143,7 @@ public class AsyncLoopTests
             WaitingTimeInMs = 1,
             PropagateExceptions = true
         };
-        
+
         var taskMock = new Mock<ITask>();
         var asyncLoop = new TestAsyncLoop(
             configuration,
@@ -153,7 +153,7 @@ public class AsyncLoopTests
             funcMock.Object);
 
         // Act
-        Assert.That(async ()=> await asyncLoop.RunAsync(cancellationToken), Throws.TypeOf<NotSupportedException>());
+        Assert.That((Func<Task>)(() => asyncLoop.RunAsync(cancellationToken)), Throws.TypeOf<NotSupportedException>());
     }
 
     [Test]
@@ -173,7 +173,7 @@ public class AsyncLoopTests
             WaitingTimeInMs = 1,
             PropagateExceptions = false
         };
-        
+
         var taskMock = new Mock<ITask>();
         var asyncLoop = new TestAsyncLoop(
             configuration,
