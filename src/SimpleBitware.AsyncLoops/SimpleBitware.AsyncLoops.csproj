@@ -48,7 +48,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SimpleBitware.Common.Abstractions" Version="1.0.2" />
+    <PackageReference Include="SimpleBitware.Common.Abstractions" Version="1.0.4" />
     <PackageReference Include="System.Text.Json" Version="9.0.2" />
     <PackageReference Include="MinVer" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
